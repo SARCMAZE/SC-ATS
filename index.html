@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Enterprise ATS Resume Analyzer</title>
+
+<style>
+  /* Color Palette (NO WHITE):
+     Base/Background: #14101e (Very dark charcoal/slate purple)
+     Card Backgrounds: #211c2e (Slightly lighter dark purple for contrast)
+     Primary Accent (Dark Purple): #9753e8
+     Secondary Accent (Deep Green): #047857
+     Text Color: #d4c1f9 (Light purple/lavender)
+     Input Background: #14101e (Same as body for smooth look)
+  */
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
+  /* --- Dynamic Background Container (Dark Theme) --- */
+  .animated-background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    z-index: -1;
+  }
+
+  /* The actual moving shapes */
+  .animated-background li {
+    position: absolute;
+    display: block;
+    list-style: none;
+    width: 20px;
+    height: 20px;
+    background: rgba(151, 83, 232, 0.1); /* Dark Purple accent, low opacity */
+    animation: animate 25s linear infinite;
+    bottom: -150px;
+    border-radius: 50%;
+    /* Use a glow effect instead of a sharp shadow */
+    box-shadow: 0 0 10px rgba(151, 83, 232, 0.5); 
+  }
+
+  .animated-background li:nth-child(1) { left: 25%; width: 80px; height: 80px; animation-delay: 0s; }
+  .animated-background li:nth-child(2) { left: 10%; width: 20px; height: 20px; animation-delay: 2s; animation-duration: 12s; background: rgba(4, 120, 87, 0.2); } /* Deep Green */
+  .animated-background li:nth-child(3) { left: 70%; width: 20px; height: 20px; animation-delay: 4s; }
+  .animated-background li:nth-child(4) { left: 40%; width: 60px; height: 60px; animation-delay: 0s; animation-duration: 18s; background: rgba(191, 151, 240, 0.1); } /* Lighter Purple */
+  .animated-background li:nth-child(5) { left: 65%; width: 20px; height: 20px; animation-delay: 0s; background: rgba(4, 120, 87, 0.2); }
+  .animated-background li:nth-child(6) { left: 75%; width: 110px; height: 110px; animation-delay: 3s; background: rgba(191, 151, 240, 0.1); }
+  .animated-background li:nth-child(7) { left: 35%; width: 150px; height: 150px; animation-delay: 7s; background: rgba(4, 120, 87, 0.2); }
+
+  /* Keyframe animation remains the same for movement and shape change */
+  @keyframes animate {
+    0% {
+      transform: translateY(0) rotate(0deg);
+      opacity: 1;
+      border-radius: 0;
+    }
+
+    50% {
+      transform: translateY(-500px) rotate(360deg);
+      opacity: 0.8;
+      border-radius: 20%;
+    }
+
+    100% {
+      transform: translateY(-1000px) rotate(720deg);
+      opacity: 0;
+      border-radius: 50%;
+    }
+  }
+  /* --- End Dynamic Background --- */
+
+
+  /* --- Main App Styling (Dark Green-Purple) --- */
+  body {
+    font-family: "Inter", sans-serif;
+    background: #14101e; /* Base: Very dark slate purple */
+    padding: 40px;
+    line-height: 1.6;
+    color: #d4c1f9; /* Light purple text */
+  }
+
+  .app {
+    max-width: 1100px;
+    margin: auto;
+    background: #211c2e; /* Card Background: Slightly lighter dark purple */
+    padding: 50px;
+    border-radius: 16px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5); /* Stronger shadow in dark mode */
+    border: 1px solid #3d3550; /* Darker border */
+    position: relative; 
+    z-index: 10;
+  }
+
+  h1 {
+    color: #9753e8; /* Bright Purple for main title */
+    margin-bottom: 5px;
+    font-weight: 700;
+  }
+
+  .subtitle {
+    color: #a78bfa; /* Lighter purple for subtitle */
+    margin-bottom: 40px;
+    font-size: 1.1em;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: 3fr 1.5fr;
+    gap: 40px;
+  }
+
+  label {
+    font-weight: 700;
+    color: #d4c1f9; /* Light purple text */
+    margin-top: 20px;
+    display: block;
+    font-size: 0.95em;
+  }
+
+  input, textarea {
+    width: 100%;
+    padding: 14px;
+    margin-top: 8px;
+    border-radius: 8px;
+    /* Input field design */
+    background: #14101e; /* Same as body background for sunken effect */
+    border: 1px solid #3d3550;
+    color: #d4c1f9;
+    font-size: 15px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  input:focus, textarea:focus {
+    outline: none;
+    border-color: #047857; /* Deep Green highlight on focus */
+    box-shadow: 0 0 0 3px rgba(4, 120, 87, 0.3);
+  }
+
+  textarea {
+    height: 220px;
+    resize: vertical;
+  }
+
+  button {
+    margin-top: 30px;
+    padding: 16px;
+    width: 100%;
+    background: #9753e8; /* Bright Purple Button */
+    color: #14101e; /* Dark text on bright button for contrast */
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.3s, transform 0.1s;
+    letter-spacing: 0.5px;
+  }
+
+  button:hover {
+    background: #6d28d9; /* Darker purple shade on hover */
+    box-shadow: 0 4px 15px rgba(151, 83, 232, 0.5);
+  }
+
+  .roles {
+    background: #211c2e;
+    padding: 25px;
+    border-radius: 12px;
+    border: 1px solid #3d3550;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  }
+
+  .roles h3 {
+    margin-bottom: 15px;
+    font-size: 1.1em;
+    color: #047857; /* Deep Green accent for section title */
+    border-bottom: 2px solid #38a169;
+    padding-bottom: 8px;
+  }
+
+  .roles ul {
+    padding-left: 20px;
+    color: #d4c1f9;
+    line-height: 1.8;
+  }
+
+  .roles li::marker {
+    color: #9753e8; /* Purple list markers */
+  }
+
+  #result {
+    margin-top: 30px;
+    background: #14101e; /* Darkest background for output */
+    padding: 25px;
+    border-radius: 8px;
+    border: 1px solid #3d3550;
+    white-space: pre-line;
+    font-size: 15px;
+    color: #d4c1f9;
+    min-height: 100px;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.4);
+  }
+
+  /* --- Shortlist/Upload Section (Success Theme - Green) --- */
+  .upload-section {
+    margin-top: 30px;
+    display: none;
+    padding: 25px;
+    border: 2px solid #047857; /* Deep Green success border */
+    border-radius: 12px;
+    background: #2a3d3c; /* Darker green success background */
+    box-shadow: 0 4px 10px rgba(4, 120, 87, 0.2);
+  }
+
+  .upload-section h3 {
+    font-size: 1.2em;
+    color: #38a169; /* Medium green title */
+    margin-bottom: 5px;
+  }
+  
+  .upload-section p {
+      color: #7ff0a4; /* Light green text */
+      margin-bottom: 15px;
+  }
+
+  .upload-section input[type="file"] {
+    background: #14101e;
+    border: 1px solid #047857;
+  }
+
+
+  /* --- Progress Bar --- */
+  .progress-box {
+    margin-top: 20px;
+    display: none;
+  }
+
+  .progress-bg {
+    background: #2a3d3c;
+    border-radius: 20px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 12px;
+    width: 0%;
+    /* Gradient for the green progress bar */
+    background: linear-gradient(90deg, #38a169, #047857);
+    transition: width 0.5s;
+    border-radius: 20px;
+  }
+
+  .upload-status {
+    margin-top: 8px;
+    font-weight: 600;
+    color: #38a169;
+    font-size: 0.9em;
+  }
+
+  .footer-note {
+    margin-top: 40px;
+    text-align: center;
+    font-size: 12px;
+    color: #4c4463; /* Muted dark text */
+  }
+</style>
+</head>
+
+<body>
+
+<ul class="animated-background">
+    <li></li>
+    <li></li>
+    <li></li>
+    <li></li>
+    <li></li>
+    <li></li>
+    <li></li>
+</ul>
+<div class="app">
+  <h1>Cloud-Based ATS Resume Analyzer</h1>
+  <div class="subtitle">
+    Automated resume screening using enterprise ATS logic (Text-based | Demo-Safe)
+  </div>
+
+  <div class="grid">
+
+    <div>
+      <label>Target Job Role</label>
+      <input id="jobRole" value="Software Engineer">
+
+      <label>Paste Resume Text</label>
+      <textarea id="resumeText"></textarea>
+
+      <button onclick="analyze()">Run ATS Evaluation</button>
+
+      <div id="result">Awaiting analysis...</div>
+
+      <div class="upload-section" id="uploadSection">
+        <h3>Resume Shortlisted</h3>
+        <p>Candidate qualifies for next hiring stage.</p>
+
+        <label>Upload Resume PDF</label>
+        <input type="file" accept="application/pdf" onchange="simulateUpload()">
+
+        <div class="progress-box" id="progressBox">
+          <div class="progress-bg">
+            <div class="progress-fill" id="progressFill"></div>
+          </div>
+          <div class="upload-status" id="uploadStatus">Uploading...</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="roles">
+      <h3>Supported Job Roles</h3>
+      <ul>
+        <li>Software Engineer</li>
+        <li>Backend Engineer</li>
+        <li>Machine Learning Engineer</li>
+        <li>Data Scientist</li>
+        <li>DevOps Engineer</li>
+      </ul>
+
+      <p style="margin-top:10px;font-size:13px;color:#a78bfa;">
+        ATS keywords and scoring logic are customized as per roles.
+      </p>
+    </div>
+
+  </div>
+
+  <div class="footer-note">
+
+  </div>
+</div>
+
+<script>
+const API_URL = "https://kw5xmnijzj.execute-api.ap-south-1.amazonaws.com/analyze";
+
+function analyze() {
+  const resume = document.getElementById("resumeText").value;
+  const role = document.getElementById("jobRole").value;
+  const resultDiv = document.getElementById("result");
+  const uploadSection = document.getElementById("uploadSection");
+
+  uploadSection.style.display = "none";
+  resultDiv.innerText = "Running ATS evaluation...";
+
+  fetch(API_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      resume_text: resume,
+      job_role: role
+    })
+  })
+  .then(res => res.json())
+  .then(data => {
+    const text = data.result;
+    resultDiv.innerText = text;
+
+    // Check for score 78 or higher to trigger the success/upload section
+    const match = text.match(/ATS Score:\s*(\d+)/i);
+    if (match && parseInt(match[1]) >= 78) {
+      uploadSection.style.display = "block";
+    }
+  })
+  .catch(() => {
+    resultDiv.innerText = "Unable to reach ATS service.";
+  });
+}
+
+function simulateUpload() {
+  const box = document.getElementById("progressBox");
+  const fill = document.getElementById("progressFill");
+  const status = document.getElementById("uploadStatus");
+
+  box.style.display = "block";
+  fill.style.width = "0%";
+  status.innerText = "Uploading...";
+
+  let progress = 0;
+  const interval = setInterval(() => {
+    progress += 10;
+    fill.style.width = progress + "%";
+
+    if (progress >= 100) {
+      clearInterval(interval);
+      status.innerText = "Uploaded successfully to cloud storage ✅";
+    }
+  }, 200);
+}
+
+// Function to dynamically adjust background animation for varied sizes
+function addRandomStyles() {
+    const ul = document.querySelector('.animated-background');
+    ul.querySelectorAll('li').forEach(li => {
+        const size = Math.random() * 130 + 20;
+        li.style.width = `${size}px`;
+        li.style.height = `${size}px`;
+        
+        li.style.left = `${Math.random() * 95}%`;
+        li.style.animationDelay = `${Math.random() * 10}s`;
+        li.style.animationDuration = `${Math.random() * 20 + 15}s`;
+        
+        li.style.transform = `rotate(${Math.random() * 360}deg)`;
+
+        // Randomly assign one of the four colors (Deep Green, Medium Green, Dark Purple, Light Purple)
+        const colors = ['rgba(4, 120, 87, 0.2)', 'rgba(56, 161, 105, 0.2)', 'rgba(151, 83, 232, 0.1)', 'rgba(191, 151, 240, 0.1)'];
+        li.style.background = colors[Math.floor(Math.random() * colors.length)];
+    });
+}
+
+document.addEventListener('DOMContentLoaded', addRandomStyles);
+</script>
+
+</body>
+</html>
